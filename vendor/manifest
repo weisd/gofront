@@ -2,6 +2,12 @@
 	"version": 0,
 	"dependencies": [
 		{
+			"importpath": "github.com/BurntSushi/toml",
+			"repository": "https://github.com/BurntSushi/toml",
+			"revision": "f0aeabca5a127c4078abb8c8d64298b147264b55",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/dgrijalva/jwt-go",
 			"repository": "https://github.com/dgrijalva/jwt-go",
 			"revision": "40bd0f3b4891a9d7f121bfb7b8e8b0525625e262",
@@ -89,6 +95,12 @@
 			"importpath": "github.com/valyala/fasttemplate",
 			"repository": "https://github.com/valyala/fasttemplate",
 			"revision": "3b874956e03f1636d171bda64b130f9135f42cff",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/weisd/log",
+			"repository": "https://github.com/weisd/log",
+			"revision": "540c6bacc6c19dd5ec2d2b8447638da675bff357",
 			"branch": "master"
 		}
 	]

@@ -1,0 +1,2 @@
+# log
+log in go 

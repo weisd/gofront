@@ -1,0 +1,5 @@
+_Store
+/bin
+/pkg
+src/cmd/main/app.toml
+err.log
