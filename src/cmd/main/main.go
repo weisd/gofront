@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"models"
 	"modules/log"
 	"setting"
 
@@ -29,6 +30,13 @@ func bootstrap() {
 	}
 
 	log.InitLogService(setting.Conf.Logs)
+
+	// 初始化 mysql
+	if err := models.InitModels(setting.Conf.Models); err != nil {
+		panic(err)
+	}
+	// 初始化 redis
+	models.InitRedis(setting.Conf.Redis)
 }
 
 func main() {

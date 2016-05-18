@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"models"
 	"modules/log"
 
 	"github.com/BurntSushi/toml"
@@ -19,6 +20,9 @@ type Config struct {
 	Web WebService
 
 	Logs map[string]map[string]log.LogService
+
+	Models map[string]models.GormService
+	Redis  map[string]models.RedisService
 }
 
 type WebService struct {
