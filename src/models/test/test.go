@@ -23,13 +23,12 @@ func AutoMigrate() {
 }
 
 func Add(name, pass string) (*TestGorm, error) {
-	db := models.Model()
 
 	m := &TestGorm{}
 	m.Name = name
 	m.Passwd = pass
 
-	err := db.Create(m).Error
+	err := models.Model().Create(m).Error
 	if err != nil {
 		return nil, models.Error(err)
 	}
@@ -38,14 +37,22 @@ func Add(name, pass string) (*TestGorm, error) {
 }
 
 func InfoByName(name string) (*TestGorm, error) {
-	db := models.Model()
 
 	m := &TestGorm{}
 
-	err := db.Where("name = ?", name).First(m).Error
+	err := models.Model().Where("name = ?", name).First(m).Error
 	if err != nil {
 		return nil, models.Error(err)
 	}
 
 	return m, nil
+}
+
+func List() ([]TestGorm, error) {
+	var list []TestGorm
+	err := models.Model().Find(&list).Error
+	if err != nil {
+		return list, models.Error(err)
+	}
+	return list, nil
 }

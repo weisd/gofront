@@ -33,6 +33,11 @@ func Redis(name ...string) *redis.Pool {
 	return nil
 }
 
+func HasRedis(name string) bool {
+	_, ok := RedisPools[name]
+	return ok
+}
+
 func InitRedis(confs map[string]RedisService) {
 	RedisPools = make(map[string]*redis.Pool)
 	for name, conf := range confs {

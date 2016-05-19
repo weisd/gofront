@@ -6,6 +6,7 @@ import (
 
 	"models"
 	"modules/log"
+	"modules/pongor"
 
 	"github.com/BurntSushi/toml"
 )
@@ -23,13 +24,16 @@ type Config struct {
 
 	Models map[string]models.GormService
 	Redis  map[string]models.RedisService
+
+	Pongo pongor.PongorOption
 }
 
 type WebService struct {
-	Debug    bool
-	Listen   string
-	Pprof    string
-	Fasthttp bool
+	Debug     bool
+	Listen    string
+	Pprof     string
+	Fasthttp  bool
+	StaticDir string
 }
 
 var Conf Config

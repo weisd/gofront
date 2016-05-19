@@ -45,6 +45,11 @@ func Model(name ...string) *gorm.DB {
 	return nil
 }
 
+func HasModel(name string) bool {
+	_, ok := Drivers[name]
+	return ok
+}
+
 func InitModels(confs map[string]GormService) error {
 	Drivers = make(map[string]*gorm.DB)
 	for k, v := range confs {

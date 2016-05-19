@@ -8,6 +8,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/dchest/captcha",
+			"repository": "https://github.com/dchest/captcha",
+			"revision": "9e952142169c3cd6268c6482a3a61c121536aca2",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/denisenkom/go-mssqldb",
 			"repository": "https://github.com/denisenkom/go-mssqldb",
 			"revision": "2a223b1644106bc7ca456c12cde55a80185813ef",
@@ -151,6 +157,12 @@
 			"importpath": "github.com/weisd/log",
 			"repository": "https://github.com/weisd/log",
 			"revision": "540c6bacc6c19dd5ec2d2b8447638da675bff357",
+			"branch": "master"
+		},
+		{
+			"importpath": "gopkg.in/flosch/pongo2.v3",
+			"repository": "https://gopkg.in/flosch/pongo2.v3",
+			"revision": "5e81b817a0c48c1c57cdf1a9056cf76bdee02ca9",
 			"branch": "master"
 		}
 	]

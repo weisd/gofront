@@ -7,7 +7,9 @@ import (
 	"path/filepath"
 
 	"models"
+	"modules/captcha"
 	"modules/log"
+	"modules/pongor"
 	"setting"
 
 	"github.com/labstack/echo"
@@ -37,12 +39,16 @@ func bootstrap() {
 	}
 	// 初始化 redis
 	models.InitRedis(setting.Conf.Redis)
+
+	captcha.InitCaptcha()
 }
 
 func main() {
 	flag.Parse()
 
 	bootstrap()
+
+	start()
 
 	go func() {
 		log.Info("pprof listen on %s", setting.Conf.Web.Pprof)
@@ -52,15 +58,63 @@ func main() {
 	// Echo instance
 	e := echo.New()
 
+	// render
+	render := pongor.GetRenderer(pongor.PongorOption{Directory: setting.Conf.Pongo.Directory, Reload: setting.Conf.Pongo.Reload})
+
+	e.SetRenderer(render)
+
+	// 固定返回值
+	e.SetHTTPErrorHandler(func(err error, c echo.Context) {
+
+		code := http.StatusInternalServerError
+		msg := "服务器错误"
+
+		switch err.(type) {
+		case *echo.HTTPError:
+			he := err.(*echo.HTTPError)
+			code = he.Code
+			msg = he.Message
+		case *models.Err:
+			log.Error("models ERR %s", err.Error())
+
+			msg = "数据操作失败"
+
+		default:
+			log.Error("unknown ERR %T %v", err, err)
+		}
+
+		if e.Debug() {
+			msg = err.Error()
+			log.Error("%T, %v", err, err)
+		}
+
+		c.Render(http.StatusOK, "error.html", map[string]interface{}{"code": code, "msg": msg})
+		// c.JSON(http.StatusOK, api.RetErr(code, msg))
+	})
+
+	if setting.Conf.Web.Debug {
+		e.SetDebug(true)
+	}
+
 	// Middleware
 	e.Use(mw.Logger())
 	e.Use(mw.Gzip())
 	e.Use(mw.Recover())
 
+	e.Static("/public", setting.Conf.Web.StaticDir)
+
 	// Route => handler
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!\n")
 	})
+
+	// 验证码
+	e.Get("/captcha/*", captcha.Server())
+
+	// 路由
+	router(e)
+	// 测试路由
+	tester(e)
 
 	var server engine.Server
 

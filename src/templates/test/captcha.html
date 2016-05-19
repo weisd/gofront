@@ -1,0 +1,52 @@
+{% extends "../layer/base.html" %}
+
+{% block title %}替换title{% endblock %}
+
+{% block content %}
+
+<img id=image src="/captcha/{{captchaId}}.png" alt="Captcha image">
+<a href="#" onclick="reload()">Reload</a> <br>
+<form  method=post>
+
+<input type=hidden name="captchaId" value="{{captchaId}}"><br>
+<input name="captchaSolution">
+<input type=submit value=Submit>
+</form>
+{{FLASH.ErrorMsg}}
+
+
+<div>
+
+{% for item in sliceA %}
+{{item}}
+{% endfor %}
+
+</div>
+<div>
+{% for k,v in mapA %}
+{{k}}:{{v}}
+{% endfor %}
+</div>
+
+<div>
+{{persion.Created | time:"2006-01-02"}}
+</div>
+
+
+<script>
+function setSrcQuery(e, q) {
+	var src  = e.src;
+	var p = src.indexOf('?');
+	if (p >= 0) {
+		src = src.substr(0, p);
+	}
+	e.src = src + "?" + q
+}
+
+function reload() {
+	setSrcQuery(document.getElementById('image'), "reload=" + (new Date()).getTime());
+	return false;
+}
+</script>
+
+{% endblock %}
