@@ -4,6 +4,7 @@ import (
 	"flag"
 	"net/http"
 	"os"
+
 	"path/filepath"
 
 	"models"
@@ -97,7 +98,23 @@ func main() {
 	}
 
 	// Middleware
-	e.Use(mw.Logger())
+	if setting.Conf.AccessLog.Enable {
+		file := setting.Conf.AccessLog.FilePath
+		if len(file) > 0 {
+
+			os.Mkdir(filepath.Dir(file), os.ModePerm)
+
+			f, err := os.OpenFile(file, os.O_CREATE|os.O_RDWR|os.O_APPEND, os.ModePerm)
+			if err != nil {
+				log.Error("AccessLog OpenFile failed : %v ", err)
+				err = nil
+			}
+			e.Use(mw.LoggerWithConfig(mw.LoggerConfig{Output: f}))
+		} else {
+			e.Use(mw.Logger())
+		}
+	}
+
 	e.Use(mw.Gzip())
 	e.Use(mw.Recover())
 

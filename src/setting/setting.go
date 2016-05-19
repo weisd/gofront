@@ -18,7 +18,8 @@ type CronService struct {
 }
 
 type Config struct {
-	Web WebService
+	Web       WebService
+	AccessLog AccessLogService
 
 	Logs map[string]map[string]log.LogService
 
@@ -34,6 +35,11 @@ type WebService struct {
 	Pprof     string
 	Fasthttp  bool
 	StaticDir string
+}
+
+type AccessLogService struct {
+	Enable   bool
+	FilePath string
 }
 
 var Conf Config
