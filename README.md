@@ -16,4 +16,4 @@ https://github.com/weisd/log
 https://github.com/jinzhu/gorm
 
 # redis
-https://github.com/garyburd/redigo"
+https://github.com/garyburd/redigo
