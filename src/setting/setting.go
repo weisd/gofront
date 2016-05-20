@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"middleware/session"
 	"models"
 	"modules/log"
 	"modules/pongor"
@@ -27,6 +28,8 @@ type Config struct {
 	Redis  map[string]models.RedisService
 
 	Pongo pongor.PongorOption
+
+	Session session.Options
 }
 
 type WebService struct {

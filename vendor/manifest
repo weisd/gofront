@@ -93,7 +93,7 @@
 		{
 			"importpath": "github.com/labstack/echo",
 			"repository": "https://github.com/labstack/echo",
-			"revision": "52a5dcf3cf5d0c4f35e6ed1ea78128662a3d9338",
+			"revision": "795ab0ad7791d7dd36aa1877b70a62e899441b47",
 			"branch": "master"
 		},
 		{

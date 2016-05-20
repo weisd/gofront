@@ -7,6 +7,7 @@ import (
 
 	"path/filepath"
 
+	"middleware/session"
 	"models"
 	"modules/captcha"
 	"modules/log"
@@ -40,6 +41,10 @@ func bootstrap() {
 	}
 	// 初始化 redis
 	models.InitRedis(setting.Conf.Redis)
+
+	if err := session.InitSession(setting.Conf.Session); err != nil {
+		panic(err)
+	}
 
 	captcha.InitCaptcha()
 }
@@ -117,6 +122,8 @@ func main() {
 
 	e.Use(mw.Gzip())
 	e.Use(mw.Recover())
+
+	e.Use(session.Sessioner())
 
 	e.Static("/public", setting.Conf.Web.StaticDir)
 

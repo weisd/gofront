@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/dchest/captcha"
 	"github.com/labstack/echo"
+	"middleware/session"
 	"modules/log"
 	"net/http"
 	"routers/test"
@@ -67,6 +68,32 @@ func tester(e *echo.Echo) {
 		// return c.String(http.StatusOK, "ok")
 		return c.Redirect(302, "/test/captcha")
 
+	})
+
+	r.Get("/sess/set", func(c echo.Context) error {
+		sess := session.GetStore(c)
+
+		err := sess.Set("name", "weisd")
+		if err != nil {
+			return err
+		}
+
+		return c.String(200, "ok")
+	})
+
+	r.Get("/sess/get", func(c echo.Context) error {
+		sess := session.GetStore(c)
+
+		name := ""
+		nameIf := sess.Get("name")
+		switch nameIf.(type) {
+		case string:
+			name = nameIf.(string)
+		case nil:
+			name = ""
+		}
+
+		return c.String(200, name)
 	})
 
 }
