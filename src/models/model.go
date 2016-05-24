@@ -85,6 +85,9 @@ func newGorm(conf GormService) (*gorm.DB, error) {
 		return nil, fmt.Errorf("newGorm 连接数据库失败 %v", err)
 	}
 
+	// if set this to true, `User`'s default table name will be `user`, table name setted with `TableName` won't be affected
+	db.SingularTable(true)
+
 	if conf.MaxIdle > 0 {
 		db.DB().SetMaxIdleConns(conf.MaxIdle)
 	}
