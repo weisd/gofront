@@ -97,6 +97,9 @@ type (
 
 		// Cookies returns the HTTP cookies sent with the request.
 		Cookies() []Cookie
+
+		// add Cookie
+		AddCookie(Cookie)
 	}
 
 	// Response defines the interface for HTTP response.
@@ -152,6 +155,7 @@ type (
 
 	// URL defines the interface for HTTP request url.
 	URL interface {
+		Scheme() string
 		// Path returns the request URL path.
 		Path() string
 

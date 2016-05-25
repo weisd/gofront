@@ -11,6 +11,10 @@ type (
 	}
 )
 
+func (u *URL) Scheme() string {
+	return string(u.URL.Scheme())
+}
+
 // Path implements `engine.URL#Path` function.
 func (u *URL) Path() string {
 	return string(u.URI.Path())

@@ -32,6 +32,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/engine"
 	"net/http"
 	"net/url"
 	"time"
@@ -39,12 +41,12 @@ import (
 
 // Store contains all data for one session process with specific id.
 type Store interface {
-	Set(key, value interface{}) error     //set session value
-	Get(key interface{}) interface{}      //get session value
-	Delete(key interface{}) error         //delete session value
-	SessionID() string                    //back current sessionID
-	SessionRelease(w http.ResponseWriter) // release the resource & save data to provider & return the data
-	Flush() error                         //delete all data
+	Set(key, value interface{}) error //set session value
+	Get(key interface{}) interface{}  //get session value
+	Delete(key interface{}) error     //delete session value
+	SessionID() string                //back current sessionID
+	SessionRelease(w engine.Response) // release the resource & save data to provider & return the data
+	Flush() error                     //delete all data
 }
 
 // Provider contains global session methods and saved SessionStores.
@@ -140,25 +142,21 @@ func NewManager(provideName, config string) (*Manager, error) {
 // error is not nil when there is anything wrong.
 // sid is empty when need to generate a new session id
 // otherwise return an valid session id.
-func (manager *Manager) getSid(r *http.Request) (string, error) {
+func (manager *Manager) getSid(r engine.Request) (string, error) {
 	cookie, errs := r.Cookie(manager.config.CookieName)
-	if errs != nil || cookie.Value == "" || cookie.MaxAge < 0 {
-		errs := r.ParseForm()
-		if errs != nil {
-			return "", errs
-		}
+	if errs != nil || cookie.Value() == "" || cookie.Expires().Unix() < time.Now().Unix() {
 
 		sid := r.FormValue(manager.config.CookieName)
 		return sid, nil
 	}
 
 	// HTTP Request contains cookie for sessionid info.
-	return url.QueryUnescape(cookie.Value)
+	return url.QueryUnescape(cookie.Value())
 }
 
 // SessionStart generate or read the session id from http request.
 // if session id exists, return SessionStore with this id.
-func (manager *Manager) SessionStart(w http.ResponseWriter, r *http.Request) (session Store, err error) {
+func (manager *Manager) SessionStart(w engine.Response, r engine.Request) (session Store, err error) {
 	sid, errs := manager.getSid(r)
 	if errs != nil {
 		return nil, errs
@@ -175,21 +173,23 @@ func (manager *Manager) SessionStart(w http.ResponseWriter, r *http.Request) (se
 	}
 
 	session, err = manager.provider.SessionRead(sid)
-	cookie := &http.Cookie{
-		Name:     manager.config.CookieName,
-		Value:    url.QueryEscape(sid),
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   manager.isSecure(r),
-		Domain:   manager.config.Domain,
-	}
+	cookie := &echo.Cookie{}
+	cookie.SetName(manager.config.CookieName)
+	cookie.SetValue(url.QueryEscape(sid))
+	cookie.SetPath("/")
+	cookie.SetHTTPOnly(true)
+	cookie.SetSecure(manager.isSecure(r))
+	cookie.SetDomain(manager.config.Domain)
+
 	if manager.config.CookieLifeTime > 0 {
-		cookie.MaxAge = manager.config.CookieLifeTime
-		cookie.Expires = time.Now().Add(time.Duration(manager.config.CookieLifeTime) * time.Second)
+		// cookie.MaxAge = manager.config.CookieLifeTime
+		cookie.SetExpires(time.Now().Add(time.Duration(manager.config.CookieLifeTime) * time.Second))
 	}
 	if manager.config.EnableSetCookie {
-		http.SetCookie(w, cookie)
+		w.SetCookie(cookie)
+
 	}
+
 	r.AddCookie(cookie)
 
 	return
@@ -230,37 +230,46 @@ func (manager *Manager) GC() {
 }
 
 // SessionRegenerateID Regenerate a session id for this SessionStore who's id is saving in http request.
-func (manager *Manager) SessionRegenerateID(w http.ResponseWriter, r *http.Request) (session Store) {
+func (manager *Manager) SessionRegenerateID(w engine.Response, r engine.Request) (session Store) {
 	sid, err := manager.sessionID()
 	if err != nil {
 		return
 	}
+	var c *echo.Cookie
 	cookie, err := r.Cookie(manager.config.CookieName)
-	if err != nil || cookie.Value == "" {
+	if err != nil || cookie.Value() == "" {
 		//delete old cookie
 		session, _ = manager.provider.SessionRead(sid)
-		cookie = &http.Cookie{Name: manager.config.CookieName,
-			Value:    url.QueryEscape(sid),
-			Path:     "/",
-			HttpOnly: true,
-			Secure:   manager.isSecure(r),
-			Domain:   manager.config.Domain,
-		}
+		c = &echo.Cookie{}
+		c.SetName(manager.config.CookieName)
+		c.SetValue(url.QueryEscape(sid))
+		c.SetPath("/")
+		c.SetHTTPOnly(true)
+		c.SetSecure(manager.isSecure(r))
+		c.SetDomain(manager.config.Domain)
+
 	} else {
-		oldsid, _ := url.QueryUnescape(cookie.Value)
+		oldsid, _ := url.QueryUnescape(cookie.Value())
 		session, _ = manager.provider.SessionRegenerate(oldsid, sid)
-		cookie.Value = url.QueryEscape(sid)
-		cookie.HttpOnly = true
-		cookie.Path = "/"
+
+		c = &echo.Cookie{}
+		c.SetName(cookie.Name())
+		c.SetValue(url.QueryEscape(sid))
+		c.SetPath("/")
+		c.SetHTTPOnly(true)
+		c.SetSecure(cookie.Secure())
+		c.SetDomain(cookie.Domain())
 	}
 	if manager.config.CookieLifeTime > 0 {
-		cookie.MaxAge = manager.config.CookieLifeTime
-		cookie.Expires = time.Now().Add(time.Duration(manager.config.CookieLifeTime) * time.Second)
+		// cookie.MaxAge = manager.config.CookieLifeTime
+		c.SetExpires(time.Now().Add(time.Duration(manager.config.CookieLifeTime) * time.Second))
+
 	}
 	if manager.config.EnableSetCookie {
-		http.SetCookie(w, cookie)
+		w.SetCookie(c)
+
 	}
-	r.AddCookie(cookie)
+	r.AddCookie(c)
 	return
 }
 
@@ -284,15 +293,17 @@ func (manager *Manager) sessionID() (string, error) {
 }
 
 // Set cookie with https.
-func (manager *Manager) isSecure(req *http.Request) bool {
+func (manager *Manager) isSecure(req engine.Request) bool {
 	if !manager.config.Secure {
 		return false
 	}
-	if req.URL.Scheme != "" {
-		return req.URL.Scheme == "https"
+	if req.URL().Scheme() != "" {
+		return req.URL().Scheme() == "https"
 	}
-	if req.TLS == nil {
-		return false
-	}
-	return true
+
+	return false
+	// if req.TLS == nil {
+	// 	return false
+	// }
+	// return true
 }

@@ -5,8 +5,6 @@ import (
 	"github.com/astaxie/beego/session"
 	_ "github.com/astaxie/beego/session/redis"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
-	"net/http"
 )
 
 var GlobalSessions *session.Manager
@@ -66,11 +64,11 @@ func Sessioner() echo.MiddlewareFunc {
 				return errors.New("session manager not found, use session middleware but not init ?")
 			}
 
-			sess, err := GlobalSessions.SessionStart(c.Response().(*standard.Response).ResponseWriter, c.Request().(*standard.Request).Request)
+			sess, err := GlobalSessions.SessionStart(c.Response(), c.Request())
 			if err != nil {
 				return err
 			}
-			defer sess.SessionRelease(c.Response().(http.ResponseWriter))
+			defer sess.SessionRelease(c.Response())
 
 			c.Set(CONTEXT_SESSION_KEY, sess)
 
