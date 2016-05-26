@@ -201,6 +201,7 @@ var (
 	ErrRendererNotRegistered       = errors.New("renderer not registered")
 	ErrInvalidRedirectCode         = errors.New("invalid redirect status code")
 	ErrCookieNotFound              = errors.New("cookie not found")
+	ErrRendererDataFormat          = errors.New("invalid render data format")
 )
 
 // Error handlers
@@ -239,6 +240,7 @@ func (e *Echo) NewContext(req engine.Request, res engine.Response) Context {
 		echo:     e,
 		pvalues:  make([]string, *e.maxParam),
 		store:    make(store),
+		data:     make(store),
 		handler:  notFoundHandler,
 	}
 }

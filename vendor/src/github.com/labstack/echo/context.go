@@ -113,6 +113,9 @@ type (
 		// does it based on Content-Type header.
 		Bind(interface{}) error
 
+		// add render data
+		SetData(key string, val interface{})
+
 		// Render renders a template with data and sends a text/html response with status
 		// code. Templates can be registered using `Echo.SetRenderer()`.
 		Render(int, string, interface{}) error
@@ -186,6 +189,7 @@ type (
 		pnames     []string
 		pvalues    []string
 		store      store
+		data       store
 		handler    HandlerFunc
 		echo       *Echo
 	}
@@ -332,12 +336,30 @@ func (c *context) Bind(i interface{}) error {
 	return c.echo.binder.Bind(i, c)
 }
 
+func (c *context) SetData(key string, val interface{}) {
+	c.data[key] = val
+}
+
 func (c *context) Render(code int, name string, data interface{}) (err error) {
 	if c.echo.renderer == nil {
 		return ErrRendererNotRegistered
 	}
+
+	renderData, ok := data.(map[string]interface{})
+	if data != nil && !ok {
+		return ErrRendererDataFormat
+	}
+
+	if renderData == nil {
+		renderData = make(map[string]interface{})
+	}
+
+	for k, v := range c.data {
+		renderData[k] = v
+	}
+
 	buf := new(bytes.Buffer)
-	if err = c.echo.renderer.Render(buf, name, data, c); err != nil {
+	if err = c.echo.renderer.Render(buf, name, renderData, c); err != nil {
 		return
 	}
 	c.response.Header().Set(HeaderContentType, MIMETextHTMLCharsetUTF8)
@@ -511,5 +533,6 @@ func (c *context) Reset(req engine.Request, res engine.Response) {
 	c.request = req
 	c.response = res
 	c.store = nil
+	c.data = make(store)
 	c.handler = notFoundHandler
 }

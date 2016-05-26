@@ -140,7 +140,7 @@ func main() {
 	})
 
 	// 验证码
-	e.Get("/captcha/*", captcha.Server())
+	e.Get("/captcha/*.png", captcha.Server())
 
 	// 路由
 	router(e)
