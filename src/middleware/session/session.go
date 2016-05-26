@@ -2,12 +2,10 @@ package session
 
 import (
 	"errors"
-	"fmt"
 	"github.com/astaxie/beego/session"
 	_ "github.com/astaxie/beego/session/redis"
 	"github.com/labstack/echo"
 	"net/url"
-	// "time"
 )
 
 var GlobalSessions *session.Manager
@@ -72,7 +70,6 @@ func Sessioner() echo.MiddlewareFunc {
 				return errors.New("session manager not found, use session middleware but not init ?")
 			}
 
-			fmt.Println("session start")
 			sess, err := GlobalSessions.SessionStart(c.Response(), c.Request())
 			if err != nil {
 				return err

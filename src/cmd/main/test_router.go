@@ -43,17 +43,9 @@ func tester(e *echo.Echo) {
 
 		mapA := map[string]string{"id": "123", "name": "weisd"}
 
-		// f := session.FlashVal(c)
-
-		// data["FLASH"] = f
 		data["sliceA"] = sliceA
 		data["mapA"] = mapA
 		data["persion"] = Persion{19, "weisd", time.Now()}
-
-		// c.SetData("captchaId", captcha.New())
-		// c.SetData("sliceA", sliceA)
-		// c.SetData("mapA", mapA)
-		// c.SetData("persion", Persion{19, "weisd", time.Now()})
 
 		return c.Render(http.StatusOK, "test/captcha.html", data)
 	})
@@ -64,7 +56,7 @@ func tester(e *echo.Echo) {
 		if !captcha.VerifyString(c.FormValue("captchaId"), c.FormValue("captchaSolution")) {
 
 			flash := session.GetFlash(c)
-			flash.Error("captcha auth failed")
+			flash.Error("验证码验证失败")
 		}
 
 		return c.Redirect(302, "/test/captcha")
