@@ -11,7 +11,16 @@ Enable = true
 # if FilePath not empty use file output else us os.std
 FilePath = "log/access.log"
 
+############## session #######
+
+[Session]
+# Provider set empty default is memory
+Provider = "redis"
+# redis ProviderConfig: addr,pool size,password,dbnum
+Config   = "{\"cookieName\":\"gosessionid\",\"gclifetime\":3600,\"ProviderConfig\":\"127.0.0.1:6379\"}"
+
 ############## pongo2 ########
+
 [Pongo]
 # Directory to load templates. Default is "templates"
 Directory = "src/templates"
