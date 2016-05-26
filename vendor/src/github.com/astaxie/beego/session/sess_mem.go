@@ -16,7 +16,7 @@ package session
 
 import (
 	"container/list"
-	"net/http"
+	"github.com/labstack/echo/engine"
 	"sync"
 	"time"
 )
@@ -72,7 +72,7 @@ func (st *MemSessionStore) SessionID() string {
 }
 
 // SessionRelease Implement method, no used.
-func (st *MemSessionStore) SessionRelease(w http.ResponseWriter) {
+func (st *MemSessionStore) SessionRelease(w engine.Response) {
 }
 
 // MemProvider Implement the provider interface

@@ -18,9 +18,11 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/json"
-	"net/http"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/engine"
 	"net/url"
 	"sync"
+	"time"
 )
 
 var cookiepder = &CookieProvider{}
@@ -73,7 +75,7 @@ func (st *CookieSessionStore) SessionID() string {
 }
 
 // SessionRelease Write cookie session to http response cookie
-func (st *CookieSessionStore) SessionRelease(w http.ResponseWriter) {
+func (st *CookieSessionStore) SessionRelease(w engine.Response) {
 	str, err := encodeCookie(cookiepder.block,
 		cookiepder.config.SecurityKey,
 		cookiepder.config.SecurityName,
@@ -81,13 +83,16 @@ func (st *CookieSessionStore) SessionRelease(w http.ResponseWriter) {
 	if err != nil {
 		return
 	}
-	cookie := &http.Cookie{Name: cookiepder.config.CookieName,
-		Value:    url.QueryEscape(str),
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   cookiepder.config.Secure,
-		MaxAge:   cookiepder.config.Maxage}
-	http.SetCookie(w, cookie)
+
+	cookie := &echo.Cookie{}
+	cookie.SetName(cookiepder.config.CookieName)
+	cookie.SetValue(url.QueryEscape(str))
+	cookie.SetPath("/")
+	cookie.SetHTTPOnly(true)
+	cookie.SetSecure(cookiepder.config.Secure)
+	cookie.SetExpires(time.Now().Add(time.Duration(cookiepder.config.Maxage) * time.Second))
+
+	w.SetCookie(cookie)
 	return
 }
 

@@ -33,14 +33,13 @@
 package redis
 
 import (
-	"net/http"
 	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/astaxie/beego/session"
-
 	"github.com/garyburd/redigo/redis"
+	"github.com/labstack/echo/engine"
 )
 
 var redispder = &Provider{}
@@ -62,6 +61,7 @@ func (rs *SessionStore) Set(key, value interface{}) error {
 	rs.lock.Lock()
 	defer rs.lock.Unlock()
 	rs.values[key] = value
+
 	return nil
 }
 
@@ -97,13 +97,14 @@ func (rs *SessionStore) SessionID() string {
 }
 
 // SessionRelease save session values to redis
-func (rs *SessionStore) SessionRelease(w http.ResponseWriter) {
+func (rs *SessionStore) SessionRelease(w engine.Response) {
 	b, err := session.EncodeGob(rs.values)
 	if err != nil {
 		return
 	}
 	c := rs.p.Get()
 	defer c.Close()
+
 	c.Do("SETEX", rs.sid, rs.maxlifetime, string(b))
 }
 

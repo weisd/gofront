@@ -12,7 +12,7 @@ type (
 )
 
 func (u *URL) Scheme() string {
-	return string(u.URL.Scheme())
+	return string(u.URI.Scheme())
 }
 
 // Path implements `engine.URL#Path` function.

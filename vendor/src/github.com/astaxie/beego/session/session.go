@@ -144,8 +144,7 @@ func NewManager(provideName, config string) (*Manager, error) {
 // otherwise return an valid session id.
 func (manager *Manager) getSid(r engine.Request) (string, error) {
 	cookie, errs := r.Cookie(manager.config.CookieName)
-	if errs != nil || cookie.Value() == "" || cookie.Expires().Unix() < time.Now().Unix() {
-
+	if errs != nil || cookie.Value() == "" {
 		sid := r.FormValue(manager.config.CookieName)
 		return sid, nil
 	}

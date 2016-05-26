@@ -17,9 +17,9 @@ package session
 import (
 	"errors"
 	"fmt"
+	"github.com/labstack/echo/engine"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -79,7 +79,7 @@ func (fs *FileSessionStore) SessionID() string {
 }
 
 // SessionRelease Write file session to local file with Gob string
-func (fs *FileSessionStore) SessionRelease(w http.ResponseWriter) {
+func (fs *FileSessionStore) SessionRelease(w engine.Response) {
 	b, err := EncodeGob(fs.values)
 	if err != nil {
 		return

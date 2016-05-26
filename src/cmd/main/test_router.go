@@ -57,8 +57,8 @@ func tester(e *echo.Echo) {
 
 		log.Debug("%s %s", c.FormValue("captchaId"), c.FormValue("captchaSolution"))
 		if !captcha.VerifyString(c.FormValue("captchaId"), c.FormValue("captchaSolution")) {
-
-			return c.String(http.StatusUnauthorized, "captcha err")
+			return c.Redirect(302, "/test/captcha")
+			// return c.String(http.StatusUnauthorized, "captcha err")
 			// f := session.FlashObj(c)
 			// f.Error("captcha check failed")
 
@@ -75,6 +75,7 @@ func tester(e *echo.Echo) {
 
 		err := sess.Set("name", "weisd")
 		if err != nil {
+			log.Error("sess.set %v", err)
 			return err
 		}
 
@@ -84,15 +85,16 @@ func tester(e *echo.Echo) {
 	r.Get("/sess/get", func(c echo.Context) error {
 		sess := session.GetStore(c)
 
-		name := ""
+		name := "nil"
 		nameIf := sess.Get("name")
 		switch nameIf.(type) {
 		case string:
 			name = nameIf.(string)
 		case nil:
-			name = ""
+			name = "nil"
 		}
 
+		log.Error("get end")
 		return c.String(200, name)
 	})
 

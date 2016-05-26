@@ -86,6 +86,7 @@ func main() {
 			msg = "数据操作失败"
 
 		default:
+			// panic(err)
 			log.Error("unknown ERR %T %v", err, err)
 		}
 
@@ -120,12 +121,18 @@ func main() {
 		}
 	}
 
-	e.Use(mw.Gzip())
-	e.Use(mw.Recover())
+	////////////////// middleware ///////////////
 
+	e.Use(mw.Recover())
+	e.Use(mw.Gzip())
 	e.Use(session.Sessioner())
 
 	e.Static("/public", setting.Conf.Web.StaticDir)
+
+	// e.File("/favicon.ico", "public/favicon.ico")
+	e.Get("/favicon.ico", func(c echo.Context) error {
+		return c.NoContent(http.StatusOK)
+	})
 
 	// Route => handler
 	e.GET("/", func(c echo.Context) error {
